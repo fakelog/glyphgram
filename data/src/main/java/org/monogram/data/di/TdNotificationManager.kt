@@ -45,7 +45,6 @@ import org.monogram.data.infra.FileDownloadQueue
 import org.monogram.data.notifications.NotificationMuteDecision
 import org.monogram.data.notifications.NotificationMuteResolver
 import org.monogram.data.notifications.NotificationScopeState
-import org.monogram.data.push.UnifiedPushManager
 import org.monogram.data.service.NotificationDismissReceiver
 import org.monogram.data.service.NotificationReadReceiver
 import org.monogram.data.service.NotificationReplyReceiver
@@ -54,6 +53,7 @@ import org.monogram.domain.repository.NotificationSettingsRepository
 import org.monogram.domain.repository.NotificationSettingsRepository.TdNotificationScope
 import org.monogram.domain.repository.PushProvider
 import org.monogram.domain.repository.StringProvider
+import org.monogram.domain.repository.UnifiedPushManager
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min

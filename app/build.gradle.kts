@@ -174,10 +174,10 @@ dependencies {
 
     implementation(libs.androidx.biometric)
     implementation(libs.play.services.oss.licenses)
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
-    implementation(libs.unifiedpush.connector)
 
     implementation(libs.maplibre.compose)
 
@@ -210,5 +210,5 @@ tasks.withType(DependencyTask::class.java).configureEach {
 }
 
 googleServices {
-    missingGoogleServicesStrategy = GoogleServicesPlugin.MissingGoogleServicesStrategy.WARN
+    missingGoogleServicesStrategy = GoogleServicesPlugin.MissingGoogleServicesStrategy.ERROR
 }

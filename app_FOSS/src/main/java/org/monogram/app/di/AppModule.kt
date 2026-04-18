@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import org.monogram.core.Logger
+import org.monogram.app.push.UnifiedPushManagerImpl
 import org.monogram.data.di.dataModule
 import org.monogram.domain.managers.AssetsManager
 import org.monogram.domain.managers.ClipManager
@@ -23,6 +24,7 @@ import org.monogram.domain.repository.CacheProvider
 import org.monogram.domain.repository.EditorSnippetProvider
 import org.monogram.domain.repository.ExternalNavigator
 import org.monogram.domain.repository.MessageDisplayer
+import org.monogram.domain.repository.UnifiedPushManager
 import org.monogram.presentation.core.media.ExoPlayerCache
 import org.monogram.presentation.core.media.VideoPlayerPool
 import org.monogram.presentation.core.util.AppPreferences
@@ -53,6 +55,8 @@ val appModule = module {
     single { ExoPlayerCache() }
     single { CacheController(androidContext(), get()) }
     single { VideoPlayerPool(androidContext(), get(), get()) }
+    single { UnifiedPushManagerImpl(androidContext()) }
+    single<UnifiedPushManager> { get<UnifiedPushManagerImpl>() }
     single<ClipManager> {
         ClipManagerImpl(
             androidContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager,

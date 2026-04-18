@@ -83,7 +83,6 @@ import org.monogram.data.mapper.message.MessagePersistenceMapper
 import org.monogram.data.mapper.message.MessageSenderResolver
 import org.monogram.data.notifications.NotificationMuteResolver
 import org.monogram.data.push.PushSyncTrigger
-import org.monogram.data.push.UnifiedPushManager
 import org.monogram.data.repository.AttachMenuBotRepositoryImpl
 import org.monogram.data.repository.AuthRepositoryImpl
 import org.monogram.data.repository.BotRepositoryImpl
@@ -497,7 +496,6 @@ val dataModule = module {
     }
 
     single { PushSyncTrigger(connectionManager = get(), gateway = get()) }
-    single { UnifiedPushManager(androidContext()) }
     single { NotificationMuteResolver() }
 
     single {

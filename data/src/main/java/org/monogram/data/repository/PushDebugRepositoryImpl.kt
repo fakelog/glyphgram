@@ -16,12 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.monogram.data.push.PushSyncTrigger
-import org.monogram.data.push.UnifiedPushManager
 import org.monogram.data.service.TdNotificationService
 import org.monogram.domain.repository.AppPreferencesProvider
 import org.monogram.domain.repository.PushDebugRepository
 import org.monogram.domain.repository.PushDiagnostics
+import org.monogram.domain.repository.UnifiedPushManager
 import org.monogram.domain.repository.UnifiedPushDebugStatus
+import org.monogram.domain.repository.UnifiedPushStatus
 
 class PushDebugRepositoryImpl(
     private val context: Context,
@@ -62,11 +63,11 @@ class PushDebugRepositoryImpl(
                     batteryOptimizationEnabled = batteryOpt,
                     isTdNotificationServiceRunning = serviceRunning,
                     unifiedPushStatus = when (unifiedStatus) {
-                        UnifiedPushManager.Status.IDLE -> UnifiedPushDebugStatus.IDLE
-                        UnifiedPushManager.Status.REGISTERING -> UnifiedPushDebugStatus.REGISTERING
-                        UnifiedPushManager.Status.REGISTERED -> UnifiedPushDebugStatus.REGISTERED
-                        UnifiedPushManager.Status.FAILED -> UnifiedPushDebugStatus.FAILED
-                        UnifiedPushManager.Status.UNREGISTERED -> UnifiedPushDebugStatus.UNREGISTERED
+                        UnifiedPushStatus.IDLE -> UnifiedPushDebugStatus.IDLE
+                        UnifiedPushStatus.REGISTERING -> UnifiedPushDebugStatus.REGISTERING
+                        UnifiedPushStatus.REGISTERED -> UnifiedPushDebugStatus.REGISTERED
+                        UnifiedPushStatus.FAILED -> UnifiedPushDebugStatus.FAILED
+                        UnifiedPushStatus.UNREGISTERED -> UnifiedPushDebugStatus.UNREGISTERED
                     },
                     unifiedPushEndpoint = endpoint,
                     unifiedPushSavedDistributor = unifiedPushManager.getSavedDistributor(),

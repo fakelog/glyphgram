@@ -1,41 +1,35 @@
-package org.monogram.data.push
+package org.monogram.app.push
 
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.monogram.domain.repository.UnifiedPushManager
+import org.monogram.domain.repository.UnifiedPushStatus
 import org.unifiedpush.android.connector.FailedReason
 import org.unifiedpush.android.connector.UnifiedPush
 import org.unifiedpush.android.connector.data.PushEndpoint
 import org.unifiedpush.android.connector.data.ResolvedDistributor
 
-class UnifiedPushManager(
+class UnifiedPushManagerImpl(
     private val context: Context
-) {
-    enum class Status {
-        IDLE,
-        REGISTERING,
-        REGISTERED,
-        FAILED,
-        UNREGISTERED
-    }
-
+) : UnifiedPushManager {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val _endpoint = MutableStateFlow(loadEndpoint())
-    val endpoint: StateFlow<String?> = _endpoint.asStateFlow()
+    override val endpoint: StateFlow<String?> = _endpoint.asStateFlow()
 
     private val _status = MutableStateFlow(loadStatus())
-    val status: StateFlow<Status> = _status.asStateFlow()
+    override val status: StateFlow<UnifiedPushStatus> = _status.asStateFlow()
 
-    fun isDistributorAvailable(): Boolean = UnifiedPush.getDistributors(context).isNotEmpty()
+    override fun isDistributorAvailable(): Boolean = UnifiedPush.getDistributors(context).isNotEmpty()
 
-    fun getDistributors(): List<String> = UnifiedPush.getDistributors(context)
+    override fun getDistributors(): List<String> = UnifiedPush.getDistributors(context)
 
-    fun getSavedDistributor(): String? = UnifiedPush.getSavedDistributor(context)
+    override fun getSavedDistributor(): String? = UnifiedPush.getSavedDistributor(context)
 
-    fun getAckDistributor(): String? = UnifiedPush.getAckDistributor(context)
+    override fun getAckDistributor(): String? = UnifiedPush.getAckDistributor(context)
 
     fun currentDistributor(): String? {
         val distributors = getDistributors()
@@ -64,15 +58,15 @@ class UnifiedPushManager(
         return first
     }
 
-    fun ensureRegistered(force: Boolean = false): Boolean {
+    override fun ensureRegistered(force: Boolean): Boolean {
         val distributor = currentDistributor() ?: return false
         val endpointKnown = !_endpoint.value.isNullOrBlank()
-        if (!force && endpointKnown && _status.value == Status.REGISTERED && !shouldRefreshRegistration()) {
+        if (!force && endpointKnown && _status.value == UnifiedPushStatus.REGISTERED && !shouldRefreshRegistration()) {
             Log.d(TAG, "Skip re-register: endpoint already known and fresh")
             return true
         }
 
-        _status.value = Status.REGISTERING
+        _status.value = UnifiedPushStatus.REGISTERING
         markRegistrationAttempt()
         Log.d(
             TAG,
@@ -83,19 +77,19 @@ class UnifiedPushManager(
             UnifiedPush.saveDistributor(context, distributor)
             UnifiedPush.register(context, INSTANCE_ID)
         }.onFailure {
-            _status.value = Status.FAILED
+            _status.value = UnifiedPushStatus.FAILED
             Log.e(TAG, "Failed to request UnifiedPush registration", it)
         }.isSuccess
     }
 
-    fun unregister() {
+    override fun unregister() {
         runCatching {
             UnifiedPush.unregister(context, INSTANCE_ID)
         }.onFailure {
             Log.e(TAG, "Failed to request UnifiedPush unregister", it)
         }
         clearEndpoint()
-        _status.value = Status.UNREGISTERED
+        _status.value = UnifiedPushStatus.UNREGISTERED
     }
 
     fun onNewEndpoint(endpoint: PushEndpoint) {
@@ -105,7 +99,7 @@ class UnifiedPushManager(
     fun onNewEndpoint(endpoint: String?) {
         val value = endpoint?.trim().orEmpty()
         if (value.isEmpty()) {
-            _status.value = Status.FAILED
+            _status.value = UnifiedPushStatus.FAILED
             return
         }
 
@@ -114,25 +108,25 @@ class UnifiedPushManager(
             .putLong(KEY_LAST_REGISTERED_AT, System.currentTimeMillis())
             .apply()
         _endpoint.value = value
-        _status.value = Status.REGISTERED
+        _status.value = UnifiedPushStatus.REGISTERED
         Log.d(TAG, "UnifiedPush endpoint saved: ${value.take(140)}")
     }
 
     fun onRegistrationFailed(reason: FailedReason?) {
-        _status.value = Status.FAILED
+        _status.value = UnifiedPushStatus.FAILED
         if (reason != null) {
             Log.w(TAG, "UnifiedPush registration failed: $reason")
         }
     }
 
     fun onTempUnavailable() {
-        _status.value = Status.FAILED
+        _status.value = UnifiedPushStatus.FAILED
         Log.w(TAG, "UnifiedPush distributor temporarily unavailable")
     }
 
     fun onUnregistered() {
         clearEndpoint()
-        _status.value = Status.UNREGISTERED
+        _status.value = UnifiedPushStatus.UNREGISTERED
     }
 
     fun shouldRefreshRegistration(): Boolean {
@@ -153,8 +147,8 @@ class UnifiedPushManager(
     private fun loadEndpoint(): String? =
         prefs.getString(KEY_ENDPOINT, null)?.takeIf { it.isNotBlank() }
 
-    private fun loadStatus(): Status {
-        return if (_endpoint.value.isNullOrBlank()) Status.IDLE else Status.REGISTERED
+    private fun loadStatus(): UnifiedPushStatus {
+        return if (_endpoint.value.isNullOrBlank()) UnifiedPushStatus.IDLE else UnifiedPushStatus.REGISTERED
     }
 
     private companion object {

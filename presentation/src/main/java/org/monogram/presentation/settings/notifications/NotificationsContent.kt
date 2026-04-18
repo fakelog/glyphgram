@@ -1,6 +1,5 @@
 package org.monogram.presentation.settings.notifications
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -70,8 +68,6 @@ import org.monogram.presentation.core.ui.ExpressiveDefaults
 import org.monogram.presentation.core.ui.ItemPosition
 import org.monogram.presentation.core.ui.SettingsItem
 import org.monogram.presentation.core.ui.SettingsSwitchTile
-import org.monogram.presentation.core.util.findActivity
-import org.unifiedpush.android.connector.UnifiedPush
 
 @Composable
 fun NotificationsContent(component: NotificationsComponent) {
@@ -89,7 +85,6 @@ fun NotificationsContent(component: NotificationsComponent) {
 @Composable
 private fun NotificationsMainContent(component: NotificationsComponent) {
     val state by component.state.subscribeAsState()
-    val context = LocalContext.current
     var showVibrationSheet by remember { mutableStateOf(false) }
     var showPrioritySheet by remember { mutableStateOf(false) }
     var showRepeatSheet by remember { mutableStateOf(false) }
@@ -409,34 +404,8 @@ private fun NotificationsMainContent(component: NotificationsComponent) {
             selectedOption = state.pushProvider.name,
             onOptionSelected = {
                 val selected = PushProvider.valueOf(it)
-                if (selected != PushProvider.UNIFIED_PUSH) {
-                    component.onPushProviderChanged(selected)
-                    showPushProviderSheet = false
-                    return@NotificationOptionSheet
-                }
-
-                val activity = context.findActivity()
-                if (activity == null) {
-                    Toast.makeText(
-                        context,
-                        "Cannot select UnifiedPush without active activity",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@NotificationOptionSheet
-                }
-
-                UnifiedPush.tryUseCurrentOrDefaultDistributor(activity) { success ->
-                    if (success) {
-                        component.onPushProviderChanged(PushProvider.UNIFIED_PUSH)
-                        showPushProviderSheet = false
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "UnifiedPush distributor not selected",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                component.onPushProviderChanged(selected)
+                showPushProviderSheet = false
             },
             onDismiss = { showPushProviderSheet = false }
         )

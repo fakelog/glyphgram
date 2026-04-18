@@ -25,6 +25,7 @@ plugins {
 }
 rootProject.name = "monogram"
 include(":app")
+include(":app_FOSS")
 include(":domain")
 include(":presentation")
 include(":data")

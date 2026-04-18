@@ -1,10 +1,9 @@
-package org.monogram.data.service
+package org.monogram.app.push
 
 import android.util.Log
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.monogram.data.push.PushSyncTrigger
-import org.monogram.data.push.UnifiedPushManager
 import org.monogram.domain.repository.AppPreferencesProvider
 import org.monogram.domain.repository.PushProvider
 import org.unifiedpush.android.connector.FailedReason
@@ -13,7 +12,7 @@ import org.unifiedpush.android.connector.data.PushEndpoint
 import org.unifiedpush.android.connector.data.PushMessage
 
 class UnifiedPushService : PushService(), KoinComponent {
-    private val unifiedPushManager: UnifiedPushManager by inject()
+    private val unifiedPushManager: UnifiedPushManagerImpl by inject()
     private val pushSyncTrigger: PushSyncTrigger by inject()
     private val appPreferences: AppPreferencesProvider by inject()
 
